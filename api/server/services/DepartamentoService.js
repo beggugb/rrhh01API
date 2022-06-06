@@ -1,39 +1,25 @@
 import database from "../../src/models";
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
-const { Cargo, Salario, Departamento } = database;
+const { Departamento, Salario } = database;
 
-class CargoService {
+class DepartamentoService {
 
-  static getCargos(){        
-    return new Promise((resolve,reject) =>{  
-        Cargo.findAll({
-          raw: true,
-          nest: true,                
-          order: [['nombre','ASC']],
-          attributes: ["id", "nombre","departamentoId"]
-          })
-        .then((row) => resolve(row))
-        .catch((reason) => reject({ message: reason.message }))
-    })
-  } 
-
-  static getItems(departamentoId){        
-    return new Promise((resolve,reject) =>{  
-        Cargo.findAll({
-          raw: true,
-          nest: true,                
-          order: [['nombre','ASC']],          
-          where :{departamentoId: departamentoId },
-          })
-        .then((row) => resolve(row))
-        .catch((reason) => reject({ message: reason.message }))
-    })
-  }
+    static getEstructura(){
+        return new Promise((resolve,reject) =>{
+            Departamento.findAll({
+              raw: true,
+              nest: true,        
+              attributes:['id','nombre','abreviacion']
+              })
+            .then((row) => resolve(row))
+            .catch((reason) => reject({ message: reason.message }))
+        })
+    }
 
     static getItem(pky){
         return new Promise((resolve,reject) =>{
-            Cargo.findByPk(pky,{
+            Departamento.findByPk(pky,{
               raw: true,
               nest: true
             })
@@ -43,7 +29,7 @@ class CargoService {
     }    
     static setUpdate(value,id){
         return new Promise((resolve,reject) =>{
-            Cargo.update(value, { where: { id: Number(id) } })
+            Departamento.update(value, { where: { id: Number(id) } })
             .then((row)=> resolve( row ))
             .catch((reason) => reject({ message: reason.message })) 
         })
@@ -51,7 +37,7 @@ class CargoService {
     
     static setAdd(value){
         return new Promise((resolve,reject) =>{
-            Cargo.create(value)
+            Departamento.create(value)
             .then((row) => resolve( row ))
             .catch((reason)  => reject({ message: reason.message }))  
         })
@@ -61,16 +47,12 @@ class CargoService {
         return new Promise((resolve,reject) =>{
           let page = parseInt(pag);
           let der = num * page - num;
-            Cargo.findAndCountAll({
+            Departamento.findAndCountAll({
               raw: true,
               nest: true,
               offset: der,
               limit: num,
-              order: [[prop,value]],
-              include: [
-                { model: Salario,as: "salario", attributes: ["id", "nombre"]},
-                { model: Departamento,as: "departamento", attributes: ["id", "nombre"]}
-              ]
+              order: [[prop,value]]              
             })
             .then((rows) => resolve({
               paginas: Math.ceil(rows.count / num),
@@ -84,7 +66,7 @@ class CargoService {
 
     static delete(datoId) {
         return new Promise((resolve, reject) => {
-          Cargo.destroy({ where: { id: Number(datoId) } })
+          Departamento.destroy({ where: { id: Number(datoId) } })
             .then((rows) => resolve({ message: 'eliminado' }))
             .catch((reason)  => reject({ message: reason.message }))      
         });
@@ -93,7 +75,7 @@ class CargoService {
    
     static getList(prop,value){
         return new Promise((resolve,reject) =>{
-            Cargo.findAll({
+            Departamento.findAll({
               raw: true,
               nest: true,                
               order: [[prop,value]],
@@ -108,7 +90,7 @@ class CargoService {
       return new Promise((resolve,reject) =>{            
           let iValue = '%' + value + '%'
           if (value === '--todos--' || value === null || value === '0') { iValue = '%' }            
-          Cargo.findAndCountAll({
+          Departamento.findAndCountAll({
               raw: true,
               nest: true,
               offset: 0,
@@ -129,26 +111,19 @@ class CargoService {
       .catch((reason)  => reject({ message: reason.message })) 
        })
      }
-/*
-    static getItems(categoriaId){        
-        return new Promise((resolve,reject) =>{
-            let iCategoria = categoriaId
-            let fCategoria = categoriaId
-            
-            if(categoriaId === 0 || categoriaId === '0' || categoriaId === 'undefined' ) 
-            { iCategoria = 0, fCategoria = 5000 }   
 
-            Cargo.findAll({
+    static getItems(){        
+        return new Promise((resolve,reject) =>{
+            Departamento.findAll({
               raw: true,
               nest: true,                
               order: [['nombre','ASC']],
-              attributes:['categoriaId',['nombre','label'],['id','value']],
-              where :{categoriaId: {[Op.between]: [iCategoria,fCategoria]}},
+              attributes: ["id", "nombre"]                            
               })
             .then((row) => resolve(row))
             .catch((reason) => reject({ message: reason.message }))
         })
-    } */
+    } 
     
 }
-export default CargoService;
+export default DepartamentoService;

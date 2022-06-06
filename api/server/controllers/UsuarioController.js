@@ -1,6 +1,4 @@
 import UsuarioService from "../services/UsuarioService";
-import ModuloService from "../services/ModuloService";
-import AlmacenService from "../services/AlmacenService"
 import EmpresaService from "../services/EmpresaService"
 const bcrypt = require('bcrypt')
 class UsuarioController {
@@ -93,14 +91,10 @@ class UsuarioController {
     const { username, password } = req.body;    
     UsuarioService.login(username, password)
       .then((user) => {          
-        if(user.usuario){       
-          Promise.all([
-            ModuloService.getList(user.usuario.rolId),             
-            EmpresaService.getSingles(1),
-            AlmacenService.getItem(user.usuario.almacenId)
-          ])
-            .then(([modulos, empresa, almacen]) =>{                                               
-              res.status(200).send({ user,modulos, empresa, almacen });
+        if(user.usuario){                          
+          EmpresaService.getSingles(1)          
+            .then((empresa) =>{                                               
+              res.status(200).send({ user, empresa });
             })        
         }else{
           console.log(user)

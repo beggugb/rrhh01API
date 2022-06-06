@@ -1,49 +1,103 @@
 import database from "../../src/models";
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
-const { Cargo, Salario, Departamento } = database;
+const { Registro, Persona, Departamento } = database;
 
-class CargoService {
+class RegistroService {
 
-  static getCargos(){        
-    return new Promise((resolve,reject) =>{  
-        Cargo.findAll({
+  static getAsistencia(departamentoId){
+    return new Promise((resolve,reject) =>{
+      let d     = new Date()
+      let fecha = (new Date(d + 'UTC')).toISOString().replace(/-/g, '-').split('T')[0]           
+        Registro.findAll({
           raw: true,
           nest: true,                
-          order: [['nombre','ASC']],
-          attributes: ["id", "nombre","departamentoId"]
+          order: [['id','asc']],
+          attributes:["id","fecha","personaId","departamentoId","r1","r2","r3","r4"],
+          include:[
+            {model:Departamento,as:"departamento",attributes:["id","nombre"]},
+            {model:Persona,as:"persona",attributes:["id","nombres","paterno","materno","filename"]}
+          ], 
+          where: {[Op.and]: [
+            { fecha: fecha},            
+            { departamentoId: departamentoId}
+           ]},
           })
         .then((row) => resolve(row))
         .catch((reason) => reject({ message: reason.message }))
     })
-  } 
-
-  static getItems(departamentoId){        
-    return new Promise((resolve,reject) =>{  
-        Cargo.findAll({
+  }
+  static getList(prop,value){
+    return new Promise((resolve,reject) =>{
+        Registro.findAll({
           raw: true,
           nest: true,                
-          order: [['nombre','ASC']],          
-          where :{departamentoId: departamentoId },
+          order: [[prop,value]],
+          attributes:[[prop,'label'],['id','value']]  
           })
         .then((row) => resolve(row))
         .catch((reason) => reject({ message: reason.message }))
     })
   }
 
-    static getItem(pky){
+    static verificar(personaId){
         return new Promise((resolve,reject) =>{
-            Cargo.findByPk(pky,{
+          let d     = new Date()
+          let fecha = (new Date(d + 'UTC')).toISOString().replace(/-/g, '-').split('T')[0]           
+            Registro.findOne({
               raw: true,
-              nest: true
+              nest: true,              
+              where: {[Op.and]: [
+                { fecha: fecha},            
+                { personaId: personaId},
+               ]},
             })
             .then((row)=> resolve( row ))
             .catch((reason) => reject({ message: reason.message }))
         })
-    }    
+      }
+
+    static setAdd(value){
+        return new Promise((resolve,reject) =>{
+            Registro.create(value)
+            .then((row) => resolve( row ))
+            .catch((reason)  => reject({ message: reason.message }))  
+        })
+    } 
+
+    static getItem(pky){
+        return new Promise((resolve,reject) =>{
+            Registro.findByPk(pky,{
+              raw: true,
+              nest: true,
+              attributes:["id","fecha","r1","d1","r2","d2","r3","d3","r4","d4"],
+              include:[
+                {model:Persona,as:"persona",
+                attributes:["id","nombres","paterno","materno","filename","ci"]}                
+              ] 
+            })
+            .then((row)=> resolve( row ))
+            .catch((reason) => reject({ message: reason.message }))
+        })
+    } 
+    
+    static getList(prop,value){
+        return new Promise((resolve,reject) =>{
+            Registro.findAll({
+              raw: true,
+              nest: true,                
+              order: [[prop,value]],
+              attributes:[[prop,'label'],['id','value']]  
+              })
+            .then((row) => resolve(row))
+            .catch((reason) => reject({ message: reason.message }))
+        })
+    }
+
+       
     static setUpdate(value,id){
         return new Promise((resolve,reject) =>{
-            Cargo.update(value, { where: { id: Number(id) } })
+            Registro.update(value, { where: { id: Number(id) } })
             .then((row)=> resolve( row ))
             .catch((reason) => reject({ message: reason.message })) 
         })
@@ -51,7 +105,7 @@ class CargoService {
     
     static setAdd(value){
         return new Promise((resolve,reject) =>{
-            Cargo.create(value)
+            Registro.create(value)
             .then((row) => resolve( row ))
             .catch((reason)  => reject({ message: reason.message }))  
         })
@@ -61,16 +115,12 @@ class CargoService {
         return new Promise((resolve,reject) =>{
           let page = parseInt(pag);
           let der = num * page - num;
-            Cargo.findAndCountAll({
+            Registro.findAndCountAll({
               raw: true,
               nest: true,
               offset: der,
               limit: num,
-              order: [[prop,value]],
-              include: [
-                { model: Salario,as: "salario", attributes: ["id", "nombre"]},
-                { model: Departamento,as: "departamento", attributes: ["id", "nombre"]}
-              ]
+              order: [[prop,value]]
             })
             .then((rows) => resolve({
               paginas: Math.ceil(rows.count / num),
@@ -84,40 +134,26 @@ class CargoService {
 
     static delete(datoId) {
         return new Promise((resolve, reject) => {
-          Cargo.destroy({ where: { id: Number(datoId) } })
+          Registro.destroy({ where: { id: Number(datoId) } })
             .then((rows) => resolve({ message: 'eliminado' }))
             .catch((reason)  => reject({ message: reason.message }))      
         });
     }
 
    
-    static getList(prop,value){
-        return new Promise((resolve,reject) =>{
-            Cargo.findAll({
-              raw: true,
-              nest: true,                
-              order: [[prop,value]],
-              attributes:[[prop,'label'],['id','value']]  
-              })
-            .then((row) => resolve(row))
-            .catch((reason) => reject({ message: reason.message }))
-        })
-    }
+   
 
     static search(prop,value){
       return new Promise((resolve,reject) =>{            
           let iValue = '%' + value + '%'
           if (value === '--todos--' || value === null || value === '0') { iValue = '%' }            
-          Cargo.findAndCountAll({
+          Registro.findAndCountAll({
               raw: true,
               nest: true,
               offset: 0,
               limit: 12,
               where: { [prop]: { [Op.iLike]: iValue }},
-              order: [[prop,'ASC']],
-              include: [
-                { model: Salario,as: "salario", attributes: ["id", "nombre"]}
-              ]
+              order: [[prop,'ASC']]
           })		
           .then((rows) => resolve({
               paginas: Math.ceil(rows.count / 12),
@@ -129,7 +165,7 @@ class CargoService {
       .catch((reason)  => reject({ message: reason.message })) 
        })
      }
-/*
+
     static getItems(categoriaId){        
         return new Promise((resolve,reject) =>{
             let iCategoria = categoriaId
@@ -138,17 +174,18 @@ class CargoService {
             if(categoriaId === 0 || categoriaId === '0' || categoriaId === 'undefined' ) 
             { iCategoria = 0, fCategoria = 5000 }   
 
-            Cargo.findAll({
+            Registro.findAll({
               raw: true,
               nest: true,                
               order: [['nombre','ASC']],
-              attributes:['categoriaId',['nombre','label'],['id','value']],
-              where :{categoriaId: {[Op.between]: [iCategoria,fCategoria]}},
+              attributes:[['nombre','label'],['id','value']],
+              /*attributes:['categoriaId',['nombre','label'],['id','value']],*/
+              /*where :{categoriaId: {[Op.between]: [iCategoria,fCategoria]}},*/
               })
             .then((row) => resolve(row))
             .catch((reason) => reject({ message: reason.message }))
         })
-    } */
+    } 
     
 }
-export default CargoService;
+export default RegistroService;

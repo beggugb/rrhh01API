@@ -70,12 +70,12 @@ class CargoController {
       }
       static getData(req, res) {                           
         CargoService.getData(req.params.pagina,req.params.num,req.params.prop,req.params.orden)
-          .then((data)=>{
+          .then((data)=>{            
             let resData = data.data.map((item,index)=>{
                 let iok = {
-                "id"        : item.id,   
-                "nombre"    : item.nombre,
-                "salario"   : item.salario.nombre               
+                "id"           : item.id,   
+                "nombre"       : item.nombre,
+                "departamento" : item.departamento.nombre                               
                 }
             return iok;
             })  

@@ -126,6 +126,34 @@ class ContratoController {
           res.status(400).send({ message: reason });
         });         
   }
+
+  static aprobar(req, res) {                   
+    const { item } = req.body       
+    ContratoService.setUpdate(item,item.id)
+    .then((xcontra)=>{
+      ContratoService.getData(1,12,'id','desc')
+      .then((data)=>{
+        let resData = data.data.map((item,index)=>{           
+            let iok = {
+            "id"            : item.id,   
+            "plazo"         : item.plazo,
+            "fechaInicio"   : item.fechaInicio,
+            "fechaFin"      : item.fechaFin,
+            "estado"        : item.contratado,
+            "ci"            : item.persona.id !== null ? item.persona.ci : 's/n',
+            "persona"       : item.persona.id !== null ? item.persona.nombres : 's/n',
+            "cargo"         : item.cargo.id !== null ? item.cargo.nombre : 's/n',
+            }
+        return iok;
+        })  
+        res.status(200).send({message:"compras lista", result: {data: resData, total: data.total, pagina: data.pagina,paginas:data.paginas} }); 
+      })                   
+      .catch((reason) => {                     
+        res.status(400).send({ message: reason });
+      });
+    })
+            
+  }
   static getData(req, res) {                           
     ContratoService.getData(req.params.pagina,req.params.num,req.params.prop,req.params.orden)
         .then((data)=>{

@@ -18,7 +18,7 @@ app.use(cors());
 routes(app);
 app.get('*', (req, res) => 
   res.status(200).send({
-	  message: "Welcome API ERP"
+	  message: "Welcome API SOALPRO"
 }))
 
 server.listen(port, host, () =>{

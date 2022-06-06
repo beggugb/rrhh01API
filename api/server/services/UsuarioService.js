@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 
-const { Usuario, Sucursal, Rol, Almacen } = database;
+const { Usuario, Rol } = database;
 
 class UsuarioService {
 
@@ -20,8 +20,7 @@ class UsuarioService {
           order: [[prop,value]],          
           attributes:["id","nombres","estado","almacenId"],
           include:[
-            {model:Rol,as:"rol",attributes:["id","nombre"]},
-            {model:Almacen,as:"almacen",attributes:["id","nombre"]}
+            {model:Rol,as:"rol",attributes:["id","nombre"]}            
           ],
           where: { id: { [Op.gt]: 1 }}, 
         })
@@ -39,7 +38,7 @@ static login(username, password) {
     return new Promise((resolve, reject) => {
       Usuario.findOne({        
         where: { username: { [Op.eq]: username } },  
-        attributes: ['id','nombres','username','password','rolId','almacenId','isCajero'],
+        attributes: ['id','nombres','username','password','rolId','isCajero'],
         include:[
           {model:Rol,as:"rol",attributes:["id","nombre"]}          
        ]
@@ -93,7 +92,7 @@ static login(username, password) {
         raw: true,
         nest: true,
         attributes:['id','nombres'],
-        include:[ {model: Almacen, as: "almacen",attributes:['id','nombre']}]        
+        
        })
         .then((item)=> resolve(item))
         .catch((reason) => reject({ message: reason.message }))      

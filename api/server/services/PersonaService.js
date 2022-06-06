@@ -91,7 +91,21 @@ class PersonaService {
               });             
         });
       }
-
+      static verificarCI(ci) {      
+        return new Promise((resolve, reject) => {        
+          Persona.findOne({
+            raw: true,
+            nest: true,            
+            where : { ci: {[Op.eq]: ci }}
+          })           
+            .then((result) => {                              
+                resolve(result)
+            })
+            .catch((reason) => {                
+                reject({ message: reason.message })
+              });             
+        });
+      }
  
     static getItem(pky){
         return new Promise((resolve,reject) =>{

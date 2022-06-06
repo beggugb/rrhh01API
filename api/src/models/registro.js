@@ -19,18 +19,30 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'contratoId',
         as: 'contrato',
       });
+      Registro.belongsTo(models.Departamento, {
+        foreignKey: 'departamentoId',
+        as: 'departamento',
+      });
     }
   };
   Registro.init({
-    fecha: DataTypes.DATE,
-    mes: DataTypes.DATE,
-    hora: DataTypes.DATE,
-    minutos: DataTypes.DATE,
+    fecha: DataTypes.DATE,    
+    hora: DataTypes.STRING,
+    minutos: DataTypes.STRING,
     dia: DataTypes.STRING,
     monto: DataTypes.NUMERIC,
     descuento: DataTypes.DECIMAL,
     personaId: DataTypes.INTEGER,
-    contratoId: DataTypes.INTEGER
+    departamentoId: DataTypes.INTEGER,
+    contratoId: DataTypes.INTEGER,
+    r1: DataTypes.STRING,    
+    d1: DataTypes.DECIMAL,
+    r2: DataTypes.STRING,
+    d2: DataTypes.DECIMAL,
+    r3: DataTypes.STRING,
+    d3: DataTypes.DECIMAL,
+    r4: DataTypes.STRING,
+    d4: DataTypes.DECIMAL
   }, {
     sequelize,
     modelName: 'Registro',
